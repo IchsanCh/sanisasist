@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -15,49 +17,29 @@ use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
-        Fortify::registerView(function () {
-            if ((bool) \App\Models\Setting::get('single_user_mode', true)
-                && \App\Models\User::exists()) {
-                abort(403, 'Registration is disabled.');
-            }
-            return \Inertia\Inertia::render('auth/register');
-        });
     }
 
-    /**
-     * Configure Fortify actions.
-     */
     private function configureActions(): void
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
     }
 
-    /**
-     * Configure Fortify views.
-     */
     private function configureViews(): void
     {
         Fortify::loginView(fn (Request $request) => Inertia::render('auth/login', [
             'canResetPassword' => Features::enabled(Features::resetPasswords()),
-            'canRegister' => Features::enabled(Features::registration()),
-            'status' => $request->session()->get('status'),
+            'canRegister'      => Features::enabled(Features::registration()),
+            'status'           => $request->session()->get('status'),
         ]));
 
         Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/reset-password', [
@@ -73,16 +55,19 @@ class FortifyServiceProvider extends ServiceProvider
             'status' => $request->session()->get('status'),
         ]));
 
-        Fortify::registerView(fn () => Inertia::render('auth/register'));
+        // ── Register view — dengan cek single_user_mode ───────────────────
+        // Hanya satu definisi di sini, tidak ada duplikat
+        Fortify::registerView(function () {
+            if ((bool) Setting::get('single_user_mode', true) && User::exists()) {
+                abort(403, 'Registration is disabled. This is a single-user instance.');
+            }
+            return Inertia::render('auth/register');
+        });
 
         Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/two-factor-challenge'));
-
         Fortify::confirmPasswordView(fn () => Inertia::render('auth/confirm-password'));
     }
 
-    /**
-     * Configure rate limiting.
-     */
     private function configureRateLimiting(): void
     {
         RateLimiter::for('two-factor', function (Request $request) {
@@ -91,7 +76,6 @@ class FortifyServiceProvider extends ServiceProvider
 
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
-
             return Limit::perMinute(5)->by($throttleKey);
         });
     }

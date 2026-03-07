@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Chat;
 
-use App\Http\Controllers\Controller;
-use App\Models\ChatSession;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Setting;
+use App\Models\ChatSession;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class ChatSessionController extends Controller
 {
@@ -25,6 +26,7 @@ class ChatSessionController extends Controller
             'sessions'          => $sessions,
             'activeSession'     => null,
             'messages'          => [],
+            'streaming_enabled' => (bool) Setting::get('streaming_enabled', true),
         ]);
     }
 
@@ -45,9 +47,10 @@ class ChatSessionController extends Controller
             ->get(['id', 'role', 'content', 'tokens', 'model_used', 'created_at']);
 
         return Inertia::render('chat/Index', [
-            'sessions'      => $sessions,
-            'activeSession' => $session->only(['id', 'title', 'metadata']),
-            'messages'      => $messages,
+            'sessions'          => $sessions,
+            'activeSession'     => $session->only(['id', 'title', 'metadata']),
+            'messages'          => $messages,
+            'streaming_enabled' => (bool) Setting::get('streaming_enabled', true),
         ]);
     }
 
