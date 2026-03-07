@@ -29,8 +29,8 @@ class AiProviderSeeder extends Seeder
                 'active'   => true,
                 'models'   => [
                     [
-                        'name'              => 'Gemini 2.0 Flash',
-                        'model_key'         => 'gemini-2.0-flash',
+                        'name'              => 'Gemini 2.5 Flash',
+                        'model_key'         => 'gemini-2.5-flash',
                         'supports_image'    => true,
                         'supports_file'     => true,
                         'supports_tools'    => true,
@@ -167,7 +167,7 @@ class AiProviderSeeder extends Seeder
     {
         // Get the default Gemini Flash model ID
         $defaultProviderId = DB::table('ai_providers')->where('slug', 'gemini')->value('id');
-        $defaultModelKey   = 'gemini-2.0-flash';
+        $defaultModelKey   = 'gemini-2.5-flash';
 
         $settings = [
             // ── Active provider & model ───────────────────────────────────
@@ -181,7 +181,11 @@ class AiProviderSeeder extends Seeder
                 'value' => $defaultModelKey,
                 'type'  => 'string',
             ],
-
+            [
+                'key'   => 'system_prompt',
+                'value' => 'You are Sanisasist, a helpful and intelligent AI assistant. You provide clear, accurate, and thoughtful responses. When writing code, always use proper formatting with code blocks. When you don\'t know something, say so honestly.',
+                'type'  => 'string',
+            ],
             // ── API Keys (empty by default — user fills these in Settings) ─
             [
                 'key'   => 'gemini_api_key',
@@ -217,7 +221,7 @@ class AiProviderSeeder extends Seeder
             ],
             [
                 'key'   => 'summary_trigger_count',
-                'value' => '10',
+                'value' => '5',
                 'type'  => 'integer',
             ],
         ];
