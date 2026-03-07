@@ -31,6 +31,13 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+        Fortify::registerView(function () {
+            if ((bool) \App\Models\Setting::get('single_user_mode', true)
+                && \App\Models\User::exists()) {
+                abort(403, 'Registration is disabled.');
+            }
+            return \Inertia\Inertia::render('auth/register');
+        });
     }
 
     /**
