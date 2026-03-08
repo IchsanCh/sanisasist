@@ -1,7 +1,7 @@
 // resources/js/components/chat/chat-sidebar.tsx
 
 import { useState } from 'react';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import {
     Check,
     MessageSquarePlus,
@@ -9,6 +9,8 @@ import {
     Pencil,
     Trash2,
     X,
+    ChevronsUpDown,
+    Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -18,8 +20,10 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { NavUser } from '@/components/nav-user';
+import { UserInfo } from '@/components/user-info';
+import { UserMenuContent } from '@/components/user-menu-content';
 import type { ChatSession } from '@/types/chat';
+import type { Auth } from '@/types';
 
 interface ChatSidebarProps {
     sessions: ChatSession[];
@@ -27,14 +31,10 @@ interface ChatSidebarProps {
 }
 
 export function ChatSidebar({ sessions, activeSessionId }: ChatSidebarProps) {
+    const { auth } = usePage<{ props: { auth: Auth } }>().props;
+
     const handleNewChat = () => {
-        router.post(
-            '/chat/sessions',
-            {},
-            {
-                preserveScroll: false,
-            },
-        );
+        router.post('/chat/sessions', {}, { preserveScroll: false });
     };
 
     return (
@@ -76,9 +76,34 @@ export function ChatSidebar({ sessions, activeSessionId }: ChatSidebarProps) {
                 )}
             </nav>
 
-            {/* Footer — user info */}
+            {/* Footer — user menu standalone (tidak butuh SidebarProvider) */}
             <div className="border-t px-2 py-2">
-                <NavUser />
+                <div className="flex items-center gap-1">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="flex flex-1 items-center gap-2 rounded-lg px-2 py-2 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent">
+                                <UserInfo user={auth.user} />
+                                <ChevronsUpDown className="ml-auto size-4 shrink-0 opacity-50" />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            side="top"
+                            align="start"
+                            className="mb-1 w-56"
+                        >
+                            <UserMenuContent user={auth.user} />
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    {/* Shortcut ke AI Settings */}
+                    <button
+                        onClick={() => router.get('/settings/ai')}
+                        title="AI Settings"
+                        className="shrink-0 rounded-lg p-2 text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    >
+                        <Settings className="size-4" />
+                    </button>
+                </div>
             </div>
         </aside>
     );
@@ -141,7 +166,6 @@ function SessionItem({ session, isActive }: SessionItemProps) {
                 onClick={handleClick}
             >
                 {isRenaming ? (
-                    // Inline rename input
                     <div
                         className="flex flex-1 items-center gap-1"
                         onClick={(e) => e.stopPropagation()}
@@ -174,7 +198,6 @@ function SessionItem({ session, isActive }: SessionItemProps) {
                     <>
                         <span className="flex-1 truncate">{session.title}</span>
 
-                        {/* Actions — muncul saat hover */}
                         <DropdownMenu>
                             <DropdownMenuTrigger
                                 asChild

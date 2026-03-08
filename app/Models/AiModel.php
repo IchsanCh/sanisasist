@@ -7,23 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/**
- * AiModel Model
- *
- * Represents a specific AI model from a provider.
- * Stores capability flags used by the UI and ChatService.
- *
- * @property int         $id
- * @property int         $provider_id
- * @property string      $name
- * @property string      $model_key
- * @property bool        $supports_image
- * @property bool        $supports_file
- * @property bool        $supports_tools
- * @property bool        $supports_streaming
- * @property int|null    $context_window
- * @property int         $sort_order
- */
 class AiModel extends Model
 {
     protected $fillable = [
@@ -83,7 +66,6 @@ class AiModel extends Model
 
     /**
      * Get model by provider slug + model_key.
-     * Used in settings resolution.
      */
     public static function findByProviderAndKey(string $providerSlug, string $modelKey): ?self
     {
@@ -94,17 +76,28 @@ class AiModel extends Model
 
     /**
      * Get the currently active model from settings.
+     * Fallback default diupdate ke gemini-2.5-flash (bukan 2.0 yang sudah retired).
      */
     public static function getActiveModel(?int $userId = null): ?self
     {
         $providerSlug = Setting::get('active_provider', 'gemini', $userId);
-        $modelKey     = Setting::get('active_model', 'gemini-2.0-flash', $userId);
+        $modelKey     = Setting::get('active_model', 'gemini-2.5-flash', $userId);
 
-        return static::findByProviderAndKey($providerSlug, $modelKey);
+        $model = static::findByProviderAndKey($providerSlug, $modelKey);
+
+        // Fallback: kalau model di setting tidak ketemu di DB,
+        // ambil model pertama dari provider yang aktif
+        if (! $model) {
+            $model = static::whereHas('provider', fn ($q) => $q->where('slug', $providerSlug))
+                           ->orderBy('sort_order')
+                           ->first();
+        }
+
+        return $model;
     }
 
     /**
-     * Display-friendly label: "Gemini 2.0 Flash (Google Gemini)"
+     * Display-friendly label: "Gemini 2.5 Flash (Google Gemini)"
      */
     public function getFullNameAttribute(): string
     {

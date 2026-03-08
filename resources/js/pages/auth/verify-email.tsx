@@ -1,13 +1,14 @@
-// Components
-import { Form, Head } from '@inertiajs/react';
+// resources/js/pages/auth/verify-email.tsx
+
+import { Head, useForm } from '@inertiajs/react';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
-import { logout } from '@/routes';
-import { send } from '@/routes/verification';
 
 export default function VerifyEmail({ status }: { status?: string }) {
+    const { post, processing } = useForm({});
+
     return (
         <AuthLayout
             title="Verify email"
@@ -22,23 +23,20 @@ export default function VerifyEmail({ status }: { status?: string }) {
                 </div>
             )}
 
-            <Form {...send.form()} className="space-y-6 text-center">
-                {({ processing }) => (
-                    <>
-                        <Button disabled={processing} variant="secondary">
-                            {processing && <Spinner />}
-                            Resend verification email
-                        </Button>
+            <div className="space-y-6 text-center">
+                <Button
+                    disabled={processing}
+                    variant="secondary"
+                    onClick={() => post('/email/verification-notification')}
+                >
+                    {processing && <Spinner />}
+                    Resend verification email
+                </Button>
 
-                        <TextLink
-                            href={logout()}
-                            className="mx-auto block text-sm"
-                        >
-                            Log out
-                        </TextLink>
-                    </>
-                )}
-            </Form>
+                <TextLink href="/logout" className="mx-auto block text-sm">
+                    Log out
+                </TextLink>
+            </div>
         </AuthLayout>
     );
 }

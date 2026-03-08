@@ -133,11 +133,20 @@
 }
 
 @layer base {
+    html,
+    body {
+        height: 100%;
+    }
     * {
         @apply border-border;
     }
 
     body {
         @apply bg-background text-foreground;
+    }
+    #app {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
 }

@@ -69,14 +69,15 @@ class AIProviderController extends Controller
         }
 
         // API keys — hanya update jika diisi (kosong = tidak ubah)
+        // Setting::set($key, $value, $userId = null, $type = 'string')
         if (! empty($validated['gemini_api_key'])) {
-            Setting::set('gemini_api_key', $validated['gemini_api_key'], type: 'encrypted');
+            Setting::set('gemini_api_key', $validated['gemini_api_key'], null, 'encrypted');
         }
         if (! empty($validated['openai_api_key'])) {
-            Setting::set('openai_api_key', $validated['openai_api_key'], type: 'encrypted');
+            Setting::set('openai_api_key', $validated['openai_api_key'], null, 'encrypted');
         }
         if (! empty($validated['claude_api_key'])) {
-            Setting::set('claude_api_key', $validated['claude_api_key'], type: 'encrypted');
+            Setting::set('claude_api_key', $validated['claude_api_key'], null, 'encrypted');
         }
 
         return back()->with('success', 'Settings berhasil disimpan.');

@@ -12,35 +12,17 @@ import { edit as editPassword } from '@/routes/user-password';
 import type { NavItem } from '@/types';
 
 const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Profile',
-        href: edit(),
-        icon: null,
-    },
-    {
-        title: 'Password',
-        href: editPassword(),
-        icon: null,
-    },
-    {
-        title: 'Two-factor auth',
-        href: show(),
-        icon: null,
-    },
-    {
-        title: 'Appearance',
-        href: editAppearance(),
-        icon: null,
-    },
+    { title: 'Profile', href: edit(), icon: null },
+    { title: 'Password', href: editPassword(), icon: null },
+    { title: 'Two-factor auth', href: show(), icon: null },
+    { title: 'Appearance', href: editAppearance(), icon: null },
+    { title: 'AI Configuration', href: '/settings/ai', icon: null },
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
 
-    // When server-side rendering, we only render the layout on the client...
-    if (typeof window === 'undefined') {
-        return null;
-    }
+    if (typeof window === 'undefined') return null;
 
     return (
         <div className="px-4 py-6">
@@ -65,7 +47,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                     'bg-muted': isCurrentOrParentUrl(item.href),
                                 })}
                             >
-                                <Link href={item.href}>
+                                <Link href={toUrl(item.href)}>
                                     {item.icon && (
                                         <item.icon className="h-4 w-4" />
                                     )}

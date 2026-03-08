@@ -49,8 +49,8 @@ class AiProviderSeeder extends Seeder
                         'sort_order'         => 2,
                     ],
                     [
-                        'name'               => 'Gemini 3 Flash',
-                        'model_key'          => 'gemini-3-flash',         // ← paling capable, limit ketat
+                        'name'               => 'Gemini 3 Flash Preview',
+                        'model_key'          => 'gemini-3-flash-preview',         // ← paling capable, limit ketat
                         'supports_image'     => true,
                         'supports_file'      => true,
                         'supports_tools'     => true,

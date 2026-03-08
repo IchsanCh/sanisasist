@@ -1,6 +1,5 @@
 // resources/js/components/chat/chat-container.tsx
 
-import { useEffect, useRef } from 'react';
 import { MessageSquare } from 'lucide-react';
 import { ChatMessage } from '@/components/chat/chat-message';
 import { StreamingMessage } from '@/components/chat/streaming-message';
@@ -34,7 +33,6 @@ export function ChatContainer({
         streamingEnabled,
     });
 
-    // Auto-scroll saat messages atau streaming content berubah
     const scrollDep = `${messages.length}-${streamingContent.length}`;
     const { scrollRef, isAtBottom, scrollToBottom } = useAutoScroll(scrollDep);
 
@@ -50,18 +48,16 @@ export function ChatContainer({
                             <ChatMessage key={message.id} message={message} />
                         ))}
 
-                        {/* Streaming placeholder */}
                         {isStreaming && (
                             <StreamingMessage content={streamingContent} />
                         )}
 
-                        {/* Spacer bawah */}
                         <div className="h-4" />
                     </div>
                 )}
             </div>
 
-            {/* Scroll to bottom button — muncul jika user scroll ke atas */}
+            {/* Scroll to bottom button */}
             {!isAtBottom && messages.length > 0 && (
                 <div className="absolute bottom-24 left-1/2 -translate-x-1/2">
                     <button
@@ -97,8 +93,6 @@ export function ChatContainer({
         </div>
     );
 }
-
-// ── Empty state ───────────────────────────────────────────────────────────────
 
 function EmptyState({ sessionTitle }: { sessionTitle: string }) {
     const isNewChat = sessionTitle === 'New Chat';
